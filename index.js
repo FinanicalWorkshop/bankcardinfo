@@ -1,5 +1,3 @@
-//test url : https://ccdcapi.alipay.com/validateAndCacheCardInfo.json?cardNo=6222005865412565805&cardBinCheck=true
-//cardType:DC->储蓄卡,CC->信用卡
 (function() {
   var root = this;
   var cardTypeMap = {
@@ -1517,45 +1515,7 @@
       if (!err && info) {
         return cbf(null, info);
       } else {
-        if (typeof module !== 'undefined' && module.exports) {
-          var https = require('https');
-          https.get("https://ccdcapi.alipay.com/validateAndCacheCardInfo.json?_input_charset=utf-8&cardNo=" + cardNo + "&cardBinCheck=true", function(res) {
-            if (res.statusCode == 200) {
-              var chunk = "";
-              res.on('data', function(d) {
-                chunk += d;
-              });
-              res.on('end', function() {
-                try {
-                  var bankInfo = JSON.parse(chunk);
-                  if (bankInfo.validated) {
-                    var info = {};
-                    info['bankName'] = getBankNameByBankCode(bankInfo.bank);
-                    info['cardType'] = bankInfo.cardType;
-                    info['bankCode'] = bankInfo.bank;
-                    info['cardTypeName'] = getCardTypeName(bankInfo.cardType);
-                    info['backName'] = info['bankName']; //向下兼容，修改字段错别字
-                    cbf(null, info);
-                  } else {
-                    errMsg = cardNo + ":该银行卡不存在," + chunk;
-                    cbf(errMsg);
-                  }
-                } catch (e) {
-                  errMsg = cardNo + ':获取alipay接口信息出错了,返回json格式不正确';
-                  cbf(errMsg);
-                }
-              })
-            } else {
-              errMsg = cardNo + ':获取alipay接口信息出错了,statusCode,' + res.statusCode;
-              cbf(errMsg);
-            }
-          }).on('error', function(e) {
-            errMsg = cardNo + ':获取alipay接口信息出错了';
-            cbf(errMsg);
-          });
-        } else {
-          cbf(cardNo + ":该银行卡不存在");
-        }
+        return cbf(null, {})
       }
     });
   }
@@ -1582,7 +1542,6 @@
   }
 
   function promiseApi(cardNo, cbf) {
-    var Promise = require('bluebird');
     return new Promise(function(resolve, reject) {
       getBankBin(cardNo, function(err, data) {
         if (err) {
@@ -1590,7 +1549,7 @@
         }
         resolve(data)
       })
-    }).asCallback(cbf)
+    })
   }
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
